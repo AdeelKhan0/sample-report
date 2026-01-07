@@ -88,31 +88,33 @@
 </div>
 
 <script>
-  const SHEET_ID = "1gAA5xw5PujEoKdw1SEWgmsGXY6OSCRZqLmsQ6do-1gc";
-  const SHEET_URL =
-    const SHEET_URL =
-  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&tq=select%20*`;
+  const CSV_URL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vR_J4ku3OjCF-hOVgu1ftLRTne5-Y1lAIpZKAEckBWYEiL1o1Cv4PJ3_b97Xz3G_LC1RlsjE-ujoHSw/pub?output=csv";
+
   let sheetData = [];
 
-  // Fetch data from Google Sheet
-  fetch(SHEET_URL)
+  fetch(CSV_URL)
     .then(res => res.text())
-    .then(text => {
-      const json = JSON.parse(text.substring(47).slice(0, -2));
-      sheetData = json.table.rows.map(r =>
-        r.c.map(c => c ? c.v : "")
+    .then(csv => {
+      const rows = csv.trim().split("\n").map(r =>
+        r.split(",").map(c => c.replace(/^"|"$/g, "").trim())
       );
+
+      // remove header row
+      sheetData = rows.slice(1);
       loadDropdown();
+    })
+    .catch(err => {
+      document.getElementById("tableBody").innerHTML =
+        "<tr><td colspan='6'>Failed to load Google Sheet data</td></tr>";
+      console.error(err);
     });
 
-  // Populate dropdown
   function loadDropdown() {
     const dropdown = document.getElementById("dateDropdown");
+    const dates = [...new Set(sheetData.map(r => r[1]))].filter(Boolean);
 
-    // Dispatch Date column index = 1
-    const uniqueDates = [...new Set(sheetData.map(row => row[1]))];
-
-    uniqueDates.forEach(date => {
+    dates.forEach(date => {
       const opt = document.createElement("option");
       opt.value = date;
       opt.textContent = date;
@@ -122,7 +124,6 @@
     dropdown.addEventListener("change", showTable);
   }
 
-  // Show filtered table
   function showTable() {
     const selectedDate = this.value;
     const tbody = document.getElementById("tableBody");
@@ -144,10 +145,11 @@
     });
 
     tbody.innerHTML =
-      html || `<tr><td colspan="6">No data found</td></tr>`;
+      html || "<tr><td colspan='6'>No data found</td></tr>";
   }
 </script>
 
 </body>
 </html>
+
 
