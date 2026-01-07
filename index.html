@@ -160,32 +160,29 @@
   }
 
   function showTable() {
-    const selectedDate = this.value;
-    const tbody = document.getElementById("tableBody");
-    let html = "";
+  const selectedDate = this.value;
+  const tbody = document.getElementById("tableBody");
+  let html = "";
 
-    sheetData.forEach(row => {
-      if (row[1] === selectedDate) {
-        html += `
-          <tr>
-            <td>${row[0]}</td>
-            <td>${row[1]}</td>
-            <td>${row[2]}</td>
-            <td>${row[8]}</td>
-            <td>${row[9]}</td>
-            <td>${row[10]}</td>
-          </tr>
-        `;
-      }
-    });
+  sheetData.forEach(row => {
+    if (row[1] === selectedDate) {
+      html += "<tr>";
+      row.forEach(cell => {
+        html += `<td>${cell}</td>`;
+      });
+      html += "</tr>";
+    }
+  });
 
-    tbody.innerHTML =
-      html || "<tr><td colspan='6'>No data found</td></tr>";
-  }
+  tbody.innerHTML =
+    html || "<tr><td colspan='20'>No data found</td></tr>";
+}
+
 </script>
 
 </body>
 </html>
+
 
 
 
