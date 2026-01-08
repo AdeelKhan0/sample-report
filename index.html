@@ -83,17 +83,9 @@ th {
   <!-- RIGHT -->
   <div class="right">
     <table>
-      <thead>
-        <tr>
-          <th>Cattle Tag</th>
-          <th>Dispatch Date</th>
-          <th>Company</th>
-          <th>Days at Farm</th>
-          <th>Final Wt</th>
-          <th>Yield</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
+  <thead id="tableHead"></thead>
+  <tbody id="tableBody">
+
         <tr>
           <td colspan="6">Select a dispatch date</td>
         </tr>
@@ -113,8 +105,11 @@ th {
     .then(res => res.text())
     .then(csv => {
       const rows = parseCSV(csv);
-      sheetData = rows.slice(1); // remove header
-      loadDropdown();
+      const headers = rows[0];
+sheetData = rows.slice(1);
+buildTableHead(headers);
+loadDropdown();
+
     })
     .catch(err => {
       document.getElementById("tableBody").innerHTML =
@@ -193,11 +188,23 @@ th {
   tbody.innerHTML =
     html || "<tr><td colspan='20'>No data found</td></tr>";
 }
+function buildTableHead(headers) {
+  const thead = document.getElementById("tableHead");
+  let html = "<tr>";
+
+  headers.forEach(h => {
+    html += `<th>${h}</th>`;
+  });
+
+  html += "</tr>";
+  thead.innerHTML = html;
+}
 
 </script>
 
 </body>
 </html>
+
 
 
 
