@@ -36,50 +36,34 @@
 
   table {
     width: 100%;
-  border-collapse: collapse;
-  table-layout: auto;          
-  min-width: max-content;      
+    border-collapse: collapse;
+    table-layout: auto;
+    min-width: max-content;
   }
 
   th {
-      background-color: #f4f4f4;
-  font-weight: bold;
-  white-space: nowrap;         /* keep headings in one line */
-  padding: 10px 14px;
-  text-align: center;
+    background-color: #f4f4f4;
+    font-weight: bold;
+    white-space: nowrap;
+    padding: 10px 14px;
+    text-align: center;
   }
 
   td {
- white-space: nowrap;         /* adjust width to text */
-  padding: 8px 12px;
-  text-align: center;
+    white-space: nowrap;
+    padding: 8px 12px;
+    text-align: center;
   }
 
-  .right {
-  width: 75%;
-  overflow-x: auto;
-}
+  tr:nth-child(even) {
+    background-color: #fafafa;
+  }
 
-table {
-  min-width: 1200px;
-  table-layout: auto;
-}
-
-th {
-  white-space: normal;
-  word-break: break-word;
-}
-/* Better readability */
-tr:nth-child(even) {
-  background-color: #fafafa;
-}
-
-/* Sticky header (optional but looks professional) */
-thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
 </style>
 </head>
 
@@ -95,16 +79,22 @@ thead th {
     <select id="dateDropdown">
       <option value="">-- Select Date --</option>
     </select>
+
+    <!-- ✅ ADDED: TAG DROPDOWN -->
+    <br><br>
+    <label><strong>Select Cattle Tag</strong></label><br><br>
+    <select id="tagDropdown">
+      <option value="">-- All Tags --</option>
+    </select>
   </div>
 
   <!-- RIGHT -->
   <div class="right">
     <table>
-  <thead id="tableHead"></thead>
-  <tbody id="tableBody">
-
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody">
         <tr>
-          <td colspan="6">Select a dispatch date</td>
+          <td colspan="20">Select a dispatch date or tag</td>
         </tr>
       </tbody>
     </table>
@@ -123,18 +113,11 @@ thead th {
     .then(csv => {
       const rows = parseCSV(csv);
       const headers = rows[0];
-sheetData = rows.slice(1);
-buildTableHead(headers);
-loadDropdown();
-
-    })
-    .catch(err => {
-      document.getElementById("tableBody").innerHTML =
-        "<tr><td colspan='6'>Failed to load Google Sheet data</td></tr>";
-      console.error(err);
+      sheetData = rows.slice(1);
+      buildTableHead(headers);
+      loadDropdowns();
     });
 
-  // ✅ Proper CSV parser (handles commas in quotes)
   function parseCSV(text) {
     const rows = [];
     let row = [];
@@ -171,60 +154,68 @@ loadDropdown();
     return rows.map(r => r.map(c => c.trim()));
   }
 
-  function loadDropdown() {
-    const dropdown = document.getElementById("dateDropdown");
-    dropdown.innerHTML = `<option value="">-- Select Date --</option>`;
+  /* ✅ UPDATED: LOAD BOTH DROPDOWNS */
+  function loadDropdowns() {
+    const dateDropdown = document.getElementById("dateDropdown");
+    const tagDropdown = document.getElementById("tagDropdown");
+
+    dateDropdown.innerHTML = `<option value="">-- Select Date --</option>`;
+    tagDropdown.innerHTML = `<option value="">-- All Tags --</option>`;
 
     const dates = [...new Set(sheetData.map(r => r[1]))].filter(Boolean);
+    const tags = [...new Set(sheetData.map(r => r[0]))].filter(Boolean);
 
-    dates.forEach(date => {
+    dates.forEach(d => {
       const opt = document.createElement("option");
-      opt.value = date;
-      opt.textContent = date;
-      dropdown.appendChild(opt);
+      opt.value = d;
+      opt.textContent = d;
+      dateDropdown.appendChild(opt);
     });
 
-    dropdown.addEventListener("change", showTable);
+    tags.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t;
+      opt.textContent = t;
+      tagDropdown.appendChild(opt);
+    });
+
+    dateDropdown.addEventListener("change", filterTable);
+    tagDropdown.addEventListener("change", filterTable);
   }
 
-  function showTable() {
-  const selectedDate = this.value;
-  const tbody = document.getElementById("tableBody");
-  let html = "";
+  /* ✅ UPDATED FILTER LOGIC */
+  function filterTable() {
+    const selectedDate = document.getElementById("dateDropdown").value;
+    const selectedTag = document.getElementById("tagDropdown").value;
 
-  sheetData.forEach(row => {
-    if (row[1] === selectedDate) {
-      html += "<tr>";
-      row.forEach(cell => {
-        html += `<td>${cell}</td>`;
-      });
-      html += "</tr>";
-    }
-  });
+    const tbody = document.getElementById("tableBody");
+    let html = "";
 
-  tbody.innerHTML =
-    html || "<tr><td colspan='20'>No data found</td></tr>";
-}
-function buildTableHead(headers) {
-  const thead = document.getElementById("tableHead");
-  let html = "<tr>";
+    sheetData.forEach(row => {
+      const matchDate = !selectedDate || row[1] === selectedDate;
+      const matchTag = !selectedTag || row[0] === selectedTag;
 
-  headers.forEach(h => {
-    html += `<th>${h}</th>`;
-  });
+      if (matchDate && matchTag) {
+        html += "<tr>";
+        row.forEach(cell => {
+          html += `<td>${cell}</td>`;
+        });
+        html += "</tr>";
+      }
+    });
 
-  html += "</tr>";
-  thead.innerHTML = html;
-}
+    tbody.innerHTML =
+      html || "<tr><td colspan='20'>No data found</td></tr>";
+  }
 
+  function buildTableHead(headers) {
+    const thead = document.getElementById("tableHead");
+    let html = "<tr>";
+    headers.forEach(h => html += `<th>${h}</th>`);
+    html += "</tr>";
+    thead.innerHTML = html;
+  }
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
