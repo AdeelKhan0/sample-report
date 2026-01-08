@@ -25,6 +25,7 @@
 
   .right {
     width: 75%;
+    overflow-x: auto;
   }
 
   select {
@@ -35,17 +36,23 @@
 
   table {
     width: 100%;
-    border-collapse: collapse;
-  }
-
-  th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
+  border-collapse: collapse;
+  table-layout: auto;          
+  min-width: max-content;      
   }
 
   th {
-    background-color: #f4f4f4;
+      background-color: #f4f4f4;
+  font-weight: bold;
+  white-space: nowrap;         /* keep headings in one line */
+  padding: 10px 14px;
+  text-align: center;
+  }
+
+  td {
+ white-space: nowrap;         /* adjust width to text */
+  padding: 8px 12px;
+  text-align: center;
   }
 
   .right {
@@ -62,7 +69,17 @@ th {
   white-space: normal;
   word-break: break-word;
 }
+/* Better readability */
+tr:nth-child(even) {
+  background-color: #fafafa;
+}
 
+/* Sticky header (optional but looks professional) */
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
 </style>
 </head>
 
@@ -204,6 +221,7 @@ function buildTableHead(headers) {
 
 </body>
 </html>
+
 
 
 
